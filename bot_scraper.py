@@ -4,6 +4,7 @@ import json
 import time
 import smtplib
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from google import genai
@@ -23,9 +24,10 @@ def extract_json_from_text(text):
 def fetch_prices_with_ai(client, config):
     stores_str = ", ".join(config["trusted_stores"])
     max_extra = config["max_extra_budget_eur"]
+    rome_time = datetime.now(ZoneInfo("Europe/Rome")).strftime("%d/%m/%Y alle %H:%M")
     
     results = {
-        "last_updated": datetime.now().strftime("%d/%m/%Y alle %H:%M"),
+        "last_updated": rome_time,
         "components": [],
         "alternatives": []
     }
@@ -73,7 +75,7 @@ Rispondi ESCLUSIVAMENTE con un JSON valido con questo formato:
 
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.8-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     tools=[{"google_search": {}}],
@@ -102,8 +104,6 @@ Rispondi ESCLUSIVAMENTE con un JSON valido con questo formato:
 
         except Exception as e:
             print(f"Errore su {comp['name']}: {e}")
-            if 'response' in locals() and getattr(response, 'text', None):
-                print("Risposta grezza:", response.text[:300])
             results["components"].append({
                 "id": comp["id"],
                 "category": comp["category"],
