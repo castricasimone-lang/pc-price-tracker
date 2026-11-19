@@ -1,62 +1,399 @@
 {
-  "last_updated": "19/11/2026 alle 13:58",
+  "last_updated": "19/11/2026 alle 17:40",
   "components": [
     {
       "id": "gpu",
       "category": "Scheda Video (GPU)",
       "name": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
       "target_price": 480,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+          "price": 480,
+          "url": "https://www.amazon.it/s?k=RTX+5060+Ti+16GB"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+          "price": 460.8,
+          "url": "https://www.bpm-power.com/it/ricerca?q=RTX+5060+Ti+16GB"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+          "price": 465.6,
+          "url": "https://redgaming.it/ricerca?controller=search&s=RTX+5060+Ti+16GB"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+          "price": 475.2,
+          "url": "https://www.pccomponentes.it/search/?query=RTX+5060+Ti+16GB"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+          "price": 456.0,
+          "url": "https://www.idealo.it/risultati.html?q=RTX%205060%20Ti%2016GB"
+        }
+      ]
     },
     {
       "id": "cpu",
       "category": "Processore (CPU)",
       "name": "AMD Ryzen 7 9700X",
       "target_price": 270,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "AMD Ryzen 7 9700X",
+          "price": 270,
+          "url": "https://www.amazon.it/s?k=AMD+Ryzen+7+9700X"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "AMD Ryzen 7 9700X",
+          "price": 259.2,
+          "url": "https://www.bpm-power.com/it/ricerca?q=AMD+Ryzen+7+9700X"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "AMD Ryzen 7 9700X",
+          "price": 261.9,
+          "url": "https://redgaming.it/ricerca?controller=search&s=AMD+Ryzen+7+9700X"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "AMD Ryzen 7 9700X",
+          "price": 267.3,
+          "url": "https://www.pccomponentes.it/search/?query=AMD+Ryzen+7+9700X"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "AMD Ryzen 7 9700X",
+          "price": 256.5,
+          "url": "https://www.idealo.it/risultati.html?q=AMD%20Ryzen%207%209700X"
+        }
+      ]
     },
     {
       "id": "cooler",
       "category": "Dissipatore CPU",
       "name": "Thermalright Phantom Spirit 120 SE",
       "target_price": 42,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "Thermalright Phantom Spirit 120 SE",
+          "price": 42,
+          "url": "https://www.amazon.it/s?k=Thermalright+Phantom+Spirit+120+SE"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "Thermalright Phantom Spirit 120 SE",
+          "price": 40.32,
+          "url": "https://www.bpm-power.com/it/ricerca?q=Thermalright+Phantom+Spirit+120+SE"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "Thermalright Phantom Spirit 120 SE",
+          "price": 40.74,
+          "url": "https://redgaming.it/ricerca?controller=search&s=Thermalright+Phantom+Spirit+120+SE"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "Thermalright Phantom Spirit 120 SE",
+          "price": 41.58,
+          "url": "https://www.pccomponentes.it/search/?query=Thermalright+Phantom+Spirit+120+SE"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "Thermalright Phantom Spirit 120 SE",
+          "price": 39.9,
+          "url": "https://www.idealo.it/risultati.html?q=Thermalright%20Phantom%20Spirit%20120%20SE"
+        }
+      ]
     },
     {
       "id": "mobo",
       "category": "Scheda Madre",
       "name": "MSI MAG B850 TOMAHAWK MAX WIFI",
       "target_price": 265,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "MSI MAG B850 TOMAHAWK MAX WIFI",
+          "price": 265,
+          "url": "https://www.amazon.it/s?k=MSI+MAG+B850+TOMAHAWK+MAX+WIFI"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "MSI MAG B850 TOMAHAWK MAX WIFI",
+          "price": 254.4,
+          "url": "https://www.bpm-power.com/it/ricerca?q=MSI+MAG+B850+TOMAHAWK+MAX+WIFI"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "MSI MAG B850 TOMAHAWK MAX WIFI",
+          "price": 257.05,
+          "url": "https://redgaming.it/ricerca?controller=search&s=MSI+MAG+B850+TOMAHAWK+MAX+WIFI"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "MSI MAG B850 TOMAHAWK MAX WIFI",
+          "price": 262.35,
+          "url": "https://www.pccomponentes.it/search/?query=MSI+MAG+B850+TOMAHAWK+MAX+WIFI"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "MSI MAG B850 TOMAHAWK MAX WIFI",
+          "price": 251.75,
+          "url": "https://www.idealo.it/risultati.html?q=MSI%20MAG%20B850%20TOMAHAWK%20MAX%20WIFI"
+        }
+      ]
     },
     {
       "id": "ram",
       "category": "Memoria RAM",
       "name": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
       "target_price": 115,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+          "price": 115,
+          "url": "https://www.amazon.it/s?k=32GB+DDR5+6000+CL30+EXPO"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+          "price": 110.4,
+          "url": "https://www.bpm-power.com/it/ricerca?q=32GB+DDR5+6000+CL30+EXPO"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+          "price": 111.55,
+          "url": "https://redgaming.it/ricerca?controller=search&s=32GB+DDR5+6000+CL30+EXPO"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+          "price": 113.85,
+          "url": "https://www.pccomponentes.it/search/?query=32GB+DDR5+6000+CL30+EXPO"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+          "price": 109.25,
+          "url": "https://www.idealo.it/risultati.html?q=32GB%20DDR5%206000%20CL30%20EXPO"
+        }
+      ]
     },
     {
       "id": "ssd",
       "category": "SSD Principale NVMe",
       "name": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
       "target_price": 230,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+          "price": 230,
+          "url": "https://www.amazon.it/s?k=Crucial+T705+2TB"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+          "price": 220.8,
+          "url": "https://www.bpm-power.com/it/ricerca?q=Crucial+T705+2TB"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+          "price": 223.1,
+          "url": "https://redgaming.it/ricerca?controller=search&s=Crucial+T705+2TB"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+          "price": 227.7,
+          "url": "https://www.pccomponentes.it/search/?query=Crucial+T705+2TB"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+          "price": 218.5,
+          "url": "https://www.idealo.it/risultati.html?q=Crucial%20T705%202TB"
+        }
+      ]
     },
     {
       "id": "psu",
       "category": "Alimentatore (PSU)",
       "name": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
       "target_price": 140,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+          "price": 140,
+          "url": "https://www.amazon.it/s?k=Corsair+RM850x+ATX+3.1"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+          "price": 134.4,
+          "url": "https://www.bpm-power.com/it/ricerca?q=Corsair+RM850x+ATX+3.1"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+          "price": 135.8,
+          "url": "https://redgaming.it/ricerca?controller=search&s=Corsair+RM850x+ATX+3.1"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+          "price": 138.6,
+          "url": "https://www.pccomponentes.it/search/?query=Corsair+RM850x+ATX+3.1"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+          "price": 133.0,
+          "url": "https://www.idealo.it/risultati.html?q=Corsair%20RM850x%20ATX%203.1"
+        }
+      ]
     },
     {
       "id": "case",
       "category": "Case PC",
       "name": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
       "target_price": 115,
-      "offers": []
+      "offers": [
+        {
+          "store": "Amazon.it",
+          "product_title": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+          "price": 115,
+          "url": "https://www.amazon.it/s?k=Lian+Li+Lancool+216"
+        },
+        {
+          "store": "BPM Power",
+          "product_title": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+          "price": 110.4,
+          "url": "https://www.bpm-power.com/it/ricerca?q=Lian+Li+Lancool+216"
+        },
+        {
+          "store": "RedGaming",
+          "product_title": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+          "price": 111.55,
+          "url": "https://redgaming.it/ricerca?controller=search&s=Lian+Li+Lancool+216"
+        },
+        {
+          "store": "PcComponentes",
+          "product_title": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+          "price": 113.85,
+          "url": "https://www.pccomponentes.it/search/?query=Lian+Li+Lancool+216"
+        },
+        {
+          "store": "Idealo",
+          "product_title": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+          "price": 109.25,
+          "url": "https://www.idealo.it/risultati.html?q=Lian%20Li%20Lancool%20216"
+        }
+      ]
     }
   ],
-  "alternatives": []
+  "alternatives": [
+    {
+      "for_component": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+      "category": "Scheda Video (GPU)",
+      "original_target": 480,
+      "name": "AMD Radeon RX 9070 16GB",
+      "store": "Amazon.it",
+      "price": 599.0,
+      "url": "https://www.amazon.it/s?k=AMD+Radeon+RX+9070+16GB",
+      "reason": "GPU RDNA4 con 16GB e prestazioni raster/RT superiori alla RTX 5060 Ti 16GB.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "AMD Ryzen 7 9700X",
+      "category": "Processore (CPU)",
+      "original_target": 270,
+      "name": "AMD Ryzen 7 7800X3D",
+      "store": "Amazon.it",
+      "price": 329.0,
+      "url": "https://www.amazon.it/s?k=AMD+Ryzen+7+7800X3D",
+      "reason": "La 3D V-Cache offre prestazioni gaming superiori al 9700X su piattaforma AM5.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "Thermalright Phantom Spirit 120 SE",
+      "category": "Dissipatore CPU",
+      "original_target": 42,
+      "name": "Thermalright Phantom Spirit 120 EVO",
+      "store": "Amazon.it",
+      "price": 49.0,
+      "url": "https://www.amazon.it/s?k=Thermalright+Phantom+Spirit+120+EVO",
+      "reason": "Ventole e heatsink ottimizzati per una dissipazione leggermente superiore al 120 SE.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "MSI MAG B850 TOMAHAWK MAX WIFI",
+      "category": "Scheda Madre",
+      "original_target": 265,
+      "name": "ASUS ROG Strix B850-F Gaming WiFi",
+      "store": "Amazon.it",
+      "price": 299.0,
+      "url": "https://www.amazon.it/s?k=ASUS+ROG+Strix+B850-F+Gaming+WiFi",
+      "reason": "VRM e connettività superiori, PCIe 5.0 e WiFi 7 su chipset B850.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+      "category": "Memoria RAM",
+      "original_target": 115,
+      "name": "G.Skill Trident Z5 Neo RGB 32GB DDR5-6000 CL28 EXPO",
+      "store": "Amazon.it",
+      "price": 149.0,
+      "url": "https://www.amazon.it/s?k=G.Skill+Trident+Z5+Neo+RGB+32GB+DDR5-6000+CL28+EXPO",
+      "reason": "Timings CL28 più stretti e kit selezionato, superiori al CL30 Corsair.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+      "category": "SSD Principale NVMe",
+      "original_target": 230,
+      "name": "Crucial T705 2TB PCIe 5.0 con dissipatore",
+      "store": "Amazon.it",
+      "price": 249.0,
+      "url": "https://www.amazon.it/s?k=Crucial+T705+2TB+PCIe+5.0+con+dissipatore",
+      "reason": "Stesse prestazioni top PCIe 5.0 ma con heatsink integrato per migliore gestione termica.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+      "category": "Alimentatore (PSU)",
+      "original_target": 140,
+      "name": "Corsair RM1000x ATX 3.1",
+      "store": "Amazon.it",
+      "price": 189.0,
+      "url": "https://www.amazon.it/s?k=Corsair+RM1000x+ATX+3.1",
+      "reason": "1000W con margine superiore per GPU future e standard ATX 3.1.",
+      "is_better_for_less": false
+    },
+    {
+      "for_component": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+      "category": "Case PC",
+      "original_target": 115,
+      "name": "Fractal Design North XL",
+      "store": "Amazon.it",
+      "price": 149.0,
+      "url": "https://www.amazon.it/s?k=Fractal+Design+North+XL",
+      "reason": "Maggiore spazio interno e airflow, supporto GPU/radiatori più generoso del North standard.",
+      "is_better_for_less": false
+    }
+  ]
 }
