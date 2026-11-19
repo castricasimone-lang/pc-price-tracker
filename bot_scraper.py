@@ -1,5 +1,7 @@
 import os
+import re
 import json
+import time
 import smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
@@ -10,6 +12,13 @@ from google.genai import types
 def load_config():
     with open("config.json", "r", encoding="utf-8") as f:
         return json.load(f)
+
+def extract_json_from_text(text):
+    text = text.strip()
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+    return json.loads(text)
 
 def fetch_prices_with_ai(client, config):
     stores_str = ", ".join(config["trusted_stores"])
@@ -26,41 +35,41 @@ def fetch_prices_with_ai(client, config):
         max_alt_price = comp["target_price"] + max_extra
         
         prompt = f"""
-        Sei un esperto analista hardware e cercatore di prezzi in Europa.
-        Cerca online i prezzi attuali in Euro (€) inclusa spedizione in Italia per il componente:
-        "{comp['name']}" (Specifiche chiave: {comp['specs_notes']}, prezzo di riferimento: {comp['target_price']}€).
+Cerca su Google i prezzi attuali in Euro (€) in Italia/Europa per acquistare questo componente PC:
+Componente: {comp['name']}
+Query di ricerca: {comp['search_query']}
+Specifiche richieste: {comp['specs_notes']}
+Prezzo indicativo di riferimento: {comp['target_price']} €
 
-        Controlla esclusivamente tra questi store affidabili: {stores_str}.
-        
-        Compiti:
-        1. Trova almeno 4-6 offerte reali e disponibili per questo esatto componente (o sue varianti dirette identiche per specifiche) su diversi store tra quelli elencati, ordinati dal prezzo più basso al più alto.
-        2. Trova 2-3 prodotti ALTERNATIVI o UPGRADE nella stessa categoria ({comp['category']}) che costino al massimo {max_alt_price}€ (quindi massimo +{max_extra}€ rispetto al riferimento di {comp['target_price']}€).
-           - Se trovi un componente SUPERIORE per prestazioni/qualità a un prezzo INFERIORE o uguale a {comp['target_price']}€, imposta "is_better_for_less": true.
-           - Altrimenti imposta "is_better_for_less": false.
+Store affidabili da privilegiare: {stores_str}.
 
-        Restituisci SOLO un oggetto JSON valido con questa esatta struttura (nessun testo fuori dal JSON):
-        {{
-          "offers": [
-            {{
-              "store": "Nome Store",
-              "product_title": "Nome esatto prodotto sullo store",
-              "price": 259.90,
-              "url": "URL diretto o URL di ricerca sullo store",
-              "condition": "Nuovo"
-            }}
-          ],
-          "alternatives": [
-            {{
-              "name": "Nome componente alternativo/upgrade",
-              "store": "Nome Store",
-              "price": 249.00,
-              "url": "URL diretto o di ricerca",
-              "reason": "Breve motivo (es. +15% prestazioni a prezzo inferiore / Ottimo equivalente)",
-              "is_better_for_less": true
-            }}
-          ]
-        }}
-        """
+Devi restituire un JSON con:
+1. "offers": lista di 4 o 5 offerte reali trovate ora su store diversi (includi sempre Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes, Idealo o Trovaprezzi se disponibili), ordinate dal prezzo più basso al più alto. Se non trovi l'URL diretto al singolo prodotto, metti l'URL della pagina di ricerca di quello store per quel prodotto.
+2. "alternatives": 2 o 3 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
+   - Imposta "is_better_for_less": true SOLO se il pezzo alternativo è tecnicamente superiore a "{comp['name']}" E costa meno o uguale a {comp['target_price']} €.
+
+Rispondi ESCLUSIVAMENTE con un JSON valido con questo formato:
+{{
+  "offers": [
+    {{
+      "store": "BPM Power",
+      "product_title": "Nome prodotto",
+      "price": 255.90,
+      "url": "https://www.bpm-power.com/it/ricerca?q=..."
+    }}
+  ],
+  "alternatives": [
+    {{
+      "name": "Nome componente alternativo",
+      "store": "Amazon.it",
+      "price": 240.00,
+      "url": "https://www.amazon.it/s?k=...",
+      "reason": "Prestazioni superiori o ottimo equivalente a prezzo più basso",
+      "is_better_for_less": true
+    }}
+  ]
+}}
+"""
 
         try:
             response = client.models.generate_content(
@@ -72,18 +81,9 @@ def fetch_prices_with_ai(client, config):
                 ),
             )
             
-            raw_text = response.text.strip()
-            if raw_text.startswith("```json"):
-                raw_text = raw_text[7:]
-            if raw_text.startswith("```"):
-                raw_text = raw_text[3:]
-            if raw_text.endswith("```"):
-                raw_text = raw_text[:-3]
-            
-            parsed = json.loads(raw_text.strip())
-            
-            # Ordina offerte per prezzo crescente
+            parsed = extract_json_from_text(response.text)
             offers = sorted(parsed.get("offers", []), key=lambda x: float(x.get("price", 99999)))
+            print(f" -> Trovate {len(offers)} offerte per {comp['name']}")
             
             results["components"].append({
                 "id": comp["id"],
@@ -101,7 +101,9 @@ def fetch_prices_with_ai(client, config):
                     results["alternatives"].append(alt)
 
         except Exception as e:
-            print(f"Errore durante l'elaborazione di {comp['name']}: {e}")
+            print(f"Errore su {comp['name']}: {e}")
+            if 'response' in locals() and getattr(response, 'text', None):
+                print("Risposta grezza:", response.text[:300])
             results["components"].append({
                 "id": comp["id"],
                 "category": comp["category"],
@@ -109,6 +111,8 @@ def fetch_prices_with_ai(client, config):
                 "target_price": comp["target_price"],
                 "offers": []
             })
+        
+        time.sleep(2)
 
     return results
 
