@@ -25,9 +25,9 @@ def extract_json_from_text(text):
 def web_search_offers(query):
     snippets = []
     try:
-        with DDGS() as ddgs:
-            search_q = f"{query} prezzo euro acquista"
-            results = list(ddgs.text(search_q, region="it-it", max_results=12))
+        with DDGS(timeout=12) as ddgs:
+            search_q = f"{query} prezzo euro"
+            results = list(ddgs.text(search_q, region="it-it", max_results=8))
             for r in results:
                 snippets.append({
                     "title": r.get("title", ""),
@@ -35,14 +35,13 @@ def web_search_offers(query):
                     "snippet": r.get("body", "")
                 })
     except Exception as e:
-        print(f"Errore ricerca web per {query}: {e}")
+        print(f"Ricerca web saltata/timeout per {query}: {str(e)[:60]}")
     return snippets
 
 def generate_with_fallback(client, prompt):
     models_to_try = [
         "gemini-2.5-flash-lite",
         "gemini-3.8-flash",
-        "gemini-2.0-flash-lite",
         "gemma-3-27b-it"
     ]
     for model_name in models_to_try:
@@ -50,12 +49,15 @@ def generate_with_fallback(client, prompt):
             response = client.models.generate_content(
                 model=model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(temperature=0.1),
+                config=types.GenerateContentConfig(
+                    temperature=0.1,
+                    http_options={"timeout": 20000}
+                ),
             )
             if response and response.text:
                 return response.text
         except Exception as e:
-            print(f"Modello {model_name} non disponibile ({str(e)[:80]}), provo il successivo...")
+            print(f"Modello {model_name} saltato ({str(e)[:70]})")
             time.sleep(1)
     raise RuntimeError("Nessun modello AI disponibile al momento.")
 
@@ -71,14 +73,14 @@ def fetch_prices(client, config):
     }
 
     for comp in config["components"]:
-        print(f"Ricerca web per: {comp['name']}...")
+        print(f"Analisi componente: {comp['name']}...")
         max_alt_price = comp["target_price"] + max_extra
         
         raw_results = web_search_offers(comp["search_query"])
-        alt_results = web_search_offers(f"migliore alternativa {comp['category']} {comp['specs_notes']}")
         
         prompt = f"""
-Sei un analista hardware. Analizza questi risultati di ricerca web reali e estrai i prezzi in Euro (€) per:
+Sei un analista hardware esperto del mercato italiano ed europeo.
+Analizza i risultati web e le tue conoscenze aggiornate per restituire i prezzi in Euro (€) di:
 Componente: {comp['name']}
 Specifiche: {comp['specs_notes']}
 Prezzo target: {comp['target_price']} €
@@ -87,19 +89,16 @@ Store affidabili: {stores_str}
 Risultati web trovati:
 {json.dumps(raw_results, ensure_ascii=False)}
 
-Risultati web per alternative:
-{json.dumps(alt_results, ensure_ascii=False)}
-
 Compiti:
-1. "offers": Estrai fino a 5 offerte reali dai risultati web sopra (o dai principali store affidabili se il prezzo è presente nello snippet/titolo), ordinate dal prezzo più basso al più alto. Usa l'URL reale presente nei risultati. Se ci sono meno di 5 prezzi esatti nei risultati, aggiungi comunque i link di ricerca diretta sui principali store (Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes) con prezzo stimato di mercato realistico.
-2. "alternatives": Estrai 2-3 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
+1. "offers": Restituisci esattamente 5 offerte su 5 store diversi (scegli tra Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes, Ollo Store, Esseshop, Caseking, Idealo, Trovaprezzi), ordinate dal prezzo più basso al più alto. Usa gli URL reali trovati nei risultati web se presenti, altrimenti usa l'URL di ricerca ufficiale sullo store (es. https://www.bpm-power.com/it/ricerca?q=..., https://www.amazon.it/s?k=..., https://redgaming.it/ricerca?controller=search&s=..., https://www.ldlc.com/it-it/cerca/..., https://www.pccomponentes.it/search/?query=...).
+2. "alternatives": Restituisci 2 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
    - Imposta "is_better_for_less": true SOLO se il pezzo alternativo è tecnicamente superiore a "{comp['name']}" E costa meno o uguale a {comp['target_price']} €.
 
-Restituisci SOLO un JSON valido:
+Rispondi ESCLUSIVAMENTE con JSON valido:
 {{
   "offers": [
     {{
-      "store": "Nome Store",
+      "store": "BPM Power",
       "product_title": "Titolo prodotto",
       "price": 259.90,
       "url": "https://..."
@@ -108,7 +107,7 @@ Restituisci SOLO un JSON valido:
   "alternatives": [
     {{
       "name": "Nome componente alternativo",
-      "store": "Nome Store",
+      "store": "Amazon.it",
       "price": 245.00,
       "url": "https://...",
       "reason": "Motivo breve",
@@ -122,7 +121,7 @@ Restituisci SOLO un JSON valido:
             raw_text = generate_with_fallback(client, prompt)
             parsed = extract_json_from_text(raw_text)
             offers = sorted(parsed.get("offers", []), key=lambda x: float(x.get("price", 99999)))
-            print(f" -> Trovate {len(offers)} offerte per {comp['name']}")
+            print(f" -> OK: {len(offers)} offerte per {comp['name']}")
             
             results["components"].append({
                 "id": comp["id"],
@@ -149,7 +148,7 @@ Restituisci SOLO un JSON valido:
                 "offers": []
             })
         
-        time.sleep(2)
+        time.sleep(1)
 
     return results
 
@@ -219,7 +218,7 @@ def send_email_report(data):
     msg["To"] = email_user
     msg.attach(MIMEText(html_body, "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
         server.login(email_user, email_pass)
         server.sendmail(email_user, email_user, msg.as_string())
     print("Email inviata con successo!")
