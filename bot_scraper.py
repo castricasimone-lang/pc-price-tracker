@@ -7,6 +7,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from ddgs import DDGS
 from google import genai
 from google.genai import types
 
@@ -21,7 +22,44 @@ def extract_json_from_text(text):
         return json.loads(match.group(0))
     return json.loads(text)
 
-def fetch_prices_with_ai(client, config):
+def web_search_offers(query):
+    snippets = []
+    try:
+        with DDGS() as ddgs:
+            search_q = f"{query} prezzo euro acquista"
+            results = list(ddgs.text(search_q, region="it-it", max_results=12))
+            for r in results:
+                snippets.append({
+                    "title": r.get("title", ""),
+                    "url": r.get("href", ""),
+                    "snippet": r.get("body", "")
+                })
+    except Exception as e:
+        print(f"Errore ricerca web per {query}: {e}")
+    return snippets
+
+def generate_with_fallback(client, prompt):
+    models_to_try = [
+        "gemini-2.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-2.0-flash-lite",
+        "gemma-3-27b-it"
+    ]
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.1),
+            )
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            print(f"Modello {model_name} non disponibile ({str(e)[:80]}), provo il successivo...")
+            time.sleep(1)
+    raise RuntimeError("Nessun modello AI disponibile al momento.")
+
+def fetch_prices(client, config):
     stores_str = ", ".join(config["trusted_stores"])
     max_extra = config["max_extra_budget_eur"]
     rome_time = datetime.now(ZoneInfo("Europe/Rome")).strftime("%d/%m/%Y alle %H:%M")
@@ -33,40 +71,47 @@ def fetch_prices_with_ai(client, config):
     }
 
     for comp in config["components"]:
-        print(f"Ricerca prezzi per: {comp['name']}...")
+        print(f"Ricerca web per: {comp['name']}...")
         max_alt_price = comp["target_price"] + max_extra
         
+        raw_results = web_search_offers(comp["search_query"])
+        alt_results = web_search_offers(f"migliore alternativa {comp['category']} {comp['specs_notes']}")
+        
         prompt = f"""
-Cerca su Google i prezzi attuali in Euro (€) in Italia/Europa per acquistare questo componente PC:
+Sei un analista hardware. Analizza questi risultati di ricerca web reali e estrai i prezzi in Euro (€) per:
 Componente: {comp['name']}
-Query di ricerca: {comp['search_query']}
-Specifiche richieste: {comp['specs_notes']}
-Prezzo indicativo di riferimento: {comp['target_price']} €
+Specifiche: {comp['specs_notes']}
+Prezzo target: {comp['target_price']} €
+Store affidabili: {stores_str}
 
-Store affidabili da privilegiare: {stores_str}.
+Risultati web trovati:
+{json.dumps(raw_results, ensure_ascii=False)}
 
-Devi restituire un JSON con:
-1. "offers": lista di 4 o 5 offerte reali trovate ora su store diversi (includi sempre Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes, Idealo o Trovaprezzi se disponibili), ordinate dal prezzo più basso al più alto. Se non trovi l'URL diretto al singolo prodotto, metti l'URL della pagina di ricerca di quello store per quel prodotto.
-2. "alternatives": 2 o 3 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
+Risultati web per alternative:
+{json.dumps(alt_results, ensure_ascii=False)}
+
+Compiti:
+1. "offers": Estrai fino a 5 offerte reali dai risultati web sopra (o dai principali store affidabili se il prezzo è presente nello snippet/titolo), ordinate dal prezzo più basso al più alto. Usa l'URL reale presente nei risultati. Se ci sono meno di 5 prezzi esatti nei risultati, aggiungi comunque i link di ricerca diretta sui principali store (Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes) con prezzo stimato di mercato realistico.
+2. "alternatives": Estrai 2-3 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
    - Imposta "is_better_for_less": true SOLO se il pezzo alternativo è tecnicamente superiore a "{comp['name']}" E costa meno o uguale a {comp['target_price']} €.
 
-Rispondi ESCLUSIVAMENTE con un JSON valido con questo formato:
+Restituisci SOLO un JSON valido:
 {{
   "offers": [
     {{
-      "store": "BPM Power",
-      "product_title": "Nome prodotto",
-      "price": 255.90,
-      "url": "https://www.bpm-power.com/it/ricerca?q=..."
+      "store": "Nome Store",
+      "product_title": "Titolo prodotto",
+      "price": 259.90,
+      "url": "https://..."
     }}
   ],
   "alternatives": [
     {{
       "name": "Nome componente alternativo",
-      "store": "Amazon.it",
-      "price": 240.00,
-      "url": "https://www.amazon.it/s?k=...",
-      "reason": "Prestazioni superiori o ottimo equivalente a prezzo più basso",
+      "store": "Nome Store",
+      "price": 245.00,
+      "url": "https://...",
+      "reason": "Motivo breve",
       "is_better_for_less": true
     }}
   ]
@@ -74,16 +119,8 @@ Rispondi ESCLUSIVAMENTE con un JSON valido con questo formato:
 """
 
         try:
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    tools=[{"google_search": {}}],
-                    temperature=0.1,
-                ),
-            )
-            
-            parsed = extract_json_from_text(response.text)
+            raw_text = generate_with_fallback(client, prompt)
+            parsed = extract_json_from_text(raw_text)
             offers = sorted(parsed.get("offers", []), key=lambda x: float(x.get("price", 99999)))
             print(f" -> Trovate {len(offers)} offerte per {comp['name']}")
             
@@ -121,7 +158,6 @@ def send_email_report(data):
     email_pass = os.environ.get("EMAIL_PASS")
     
     if not email_user or not email_pass:
-        print("Credenziali email mancanti, salto invio.")
         return
 
     total_min = 0
@@ -192,7 +228,7 @@ if __name__ == "__main__":
     api_key = os.environ.get("GEMINI_API_KEY")
     client = genai.Client(api_key=api_key)
     config = load_config()
-    data = fetch_prices_with_ai(client, config)
+    data = fetch_prices(client, config)
     
     with open("prezzi.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
