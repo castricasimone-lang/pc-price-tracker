@@ -2,9 +2,7 @@ name: Monitor Prezzi PC 24-7
 
 on:
   schedule:
-    # Esegue il bot automaticamente ogni 6 ore (00:00, 06:00, 12:00, 18:00 UTC)
     - cron: '0 */6 * * *'
-  # Permette anche di avviarlo manualmente con un clic quando vuoi
   workflow_dispatch:
 
 permissions:
@@ -23,8 +21,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Installa librerie AI
-        run: pip install google-genai
+      - name: Installa librerie AI e Ricerca Web
+        run: pip install google-genai ddgs beautifulsoup4 requests
 
       - name: Esegui Bot Ricerca Prezzi e Invia Email
         env:
