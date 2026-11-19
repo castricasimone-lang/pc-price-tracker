@@ -21,12 +21,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Installa librerie AI e Ricerca Web
-        run: pip install google-genai ddgs beautifulsoup4 requests
+      - name: Installa librerie Scraping e HTTP
+        run: pip install requests beautifulsoup4
 
       - name: Esegui Bot Ricerca Prezzi e Invia Email
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: python bot_scraper.py
