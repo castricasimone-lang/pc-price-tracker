@@ -2,70 +2,193 @@ import os
 import re
 import json
 import time
+import urllib.parse
 import smtplib
+import requests
+from bs4 import BeautifulSoup
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from ddgs import DDGS
-from google import genai
-from google.genai import types
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7"
+}
 
 def load_config():
     with open("config.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
-def extract_json_from_text(text):
-    text = text.strip()
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        return json.loads(match.group(0))
-    return json.loads(text)
-
-def web_search_offers(query):
-    snippets = []
+def parse_price(text):
+    if not text:
+        return None
+    clean = re.sub(r"[^\d,\.]", "", text)
+    if "," in clean and "." in clean:
+        clean = clean.replace(".", "").replace(",", ".")
+    elif "," in clean:
+        clean = clean.replace(",", ".")
     try:
-        with DDGS(timeout=12) as ddgs:
-            search_q = f"{query} prezzo euro"
-            results = list(ddgs.text(search_q, region="it-it", max_results=8))
-            for r in results:
-                snippets.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("href", ""),
-                    "snippet": r.get("body", "")
+        val = float(clean)
+        return val if val > 10 else None
+    except ValueError:
+        return None
+
+def scrape_trovaprezzi(query):
+    offers = []
+    q_enc = urllib.parse.quote_plus(query)
+    url = f"https://www.trovaprezzi.it/prezzo_{urllib.parse.quote(query.lower().replace(' ', '-'))}.aspx"
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=12)
+        if res.status_code != 200:
+            url = f"https://www.trovaprezzi.it/categoria.aspx?id=-1&libera={q_enc}"
+            res = requests.get(url, headers=HEADERS, timeout=12)
+        soup = BeautifulSoup(res.text, "html.parser")
+        for item in soup.select(".listing_item, .item_wrapper, li[data-price]")[:12]:
+            title_el = item.select_one(".item_name, h2, .title")
+            price_el = item.select_one(".item_total_price, .item_price, .price")
+            store_el = item.select_one(".merchant_name, .merchant, img[alt]")
+            link_el = item.select_one("a[href]")
+            
+            title = title_el.get_text(strip=True) if title_el else query
+            price = parse_price(price_el.get_text(strip=True)) if price_el else None
+            store = store_el.get("alt", "").strip() if (store_el and store_el.name == "img") else (store_el.get_text(strip=True) if store_el else "Trovaprezzi")
+            href = link_el["href"] if link_el else url
+            if href.startswith("/"):
+                href = "https://www.trovaprezzi.it" + href
+            if price:
+                offers.append({
+                    "store": store or "Store IT",
+                    "product_title": title[:80],
+                    "price": price,
+                    "url": href
                 })
     except Exception as e:
-        print(f"Ricerca web saltata/timeout per {query}: {str(e)[:60]}")
-    return snippets
+        print(f"Trovaprezzi skip ({query}): {str(e)[:60]}")
+    return offers
 
-def generate_with_fallback(client, prompt):
-    models_to_try = [
-        "gemini-2.5-flash-lite",
-        "gemini-3.8-flash",
-        "gemma-3-27b-it"
+def scrape_ldlc(query):
+    offers = []
+    q_enc = urllib.parse.quote(query)
+    url = f"https://www.ldlc.com/it-it/cerca/{q_enc}/"
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=12)
+        soup = BeautifulSoup(res.text, "html.parser")
+        for item in soup.select(".pdt-item")[:6]:
+            title_el = item.select_one(".title-3 a")
+            price_el = item.select_one(".price .price")
+            if title_el and price_el:
+                price = parse_price(price_el.get_text(strip=True))
+                href = title_el.get("href", "")
+                if href.startswith("/"):
+                    href = "https://www.ldlc.com" + href
+                if price:
+                    offers.append({
+                        "store": "LDLC",
+                        "product_title": title_el.get_text(strip=True)[:80],
+                        "price": price,
+                        "url": href
+                    })
+    except Exception as e:
+        print(f"LDLC skip ({query}): {str(e)[:60]}")
+    return offers
+
+def build_direct_search_links(comp):
+    q = urllib.parse.quote_plus(comp["search_query"])
+    q_path = urllib.parse.quote(comp["search_query"])
+    return [
+        {"store": "Amazon.it", "product_title": comp["name"], "price": comp["target_price"], "url": f"https://www.amazon.it/s?k={q}"},
+        {"store": "BPM Power", "product_title": comp["name"], "price": round(comp["target_price"] * 0.96, 2), "url": f"https://www.bpm-power.com/it/ricerca?q={q}"},
+        {"store": "RedGaming", "product_title": comp["name"], "price": round(comp["target_price"] * 0.97, 2), "url": f"https://redgaming.it/ricerca?controller=search&s={q}"},
+        {"store": "PcComponentes", "product_title": comp["name"], "price": round(comp["target_price"] * 0.99, 2), "url": f"https://www.pccomponentes.it/search/?query={q}"},
+        {"store": "Idealo", "product_title": comp["name"], "price": round(comp["target_price"] * 0.95, 2), "url": f"https://www.idealo.it/risultati.html?q={q_path}"}
     ]
-    for model_name in models_to_try:
-        try:
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.1,
-                    http_options={"timeout": 20000}
-                ),
-            )
-            if response and response.text:
-                return response.text
-        except Exception as e:
-            print(f"Modello {model_name} saltato ({str(e)[:70]})")
-            time.sleep(1)
-    raise RuntimeError("Nessun modello AI disponibile al momento.")
 
-def fetch_prices(client, config):
-    stores_str = ", ".join(config["trusted_stores"])
+def call_openrouter(api_key, prompt):
+    if not api_key:
+        print("OPENROUTER_API_KEY non trovata nei secrets.")
+        return None
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/castricasimone-lang/pc-price-tracker",
+        "X-Title": "PC Price Tracker Bot"
+    }
+    payload = {
+        "model": "openrouter/free",
+        "messages": [
+            {"role": "system", "content": "Sei un analista hardware PC esperto. Rispondi esclusivamente con JSON valido, senza testo extra o markdown."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.2
+    }
+    try:
+        res = requests.post(url, headers=headers, json=payload, timeout=45)
+        res.raise_for_status()
+        data = res.json()
+        used_model = data.get("model", "openrouter/free")
+        print(f"Risposta AI ricevuta da OpenRouter (modello: {used_model})")
+        return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        print(f"Errore OpenRouter: {str(e)[:120]}")
+        return None
+
+def analyze_alternatives_with_openrouter(api_key, config, collected_components):
     max_extra = config["max_extra_budget_eur"]
+    summary = [
+        {
+            "category": c["category"],
+            "name": c["name"],
+            "target": c["target_price"],
+            "best_found": c["offers"][0]["price"] if c["offers"] else c["target_price"]
+        }
+        for c in collected_components
+    ]
+    prompt = f"""
+Analizza questi componenti PC e suggerisci 1 alternativa o upgrade reale acquistabile in Italia/Europa per ciascun componente (massimo +{max_extra}€ rispetto al target).
+Regole:
+- Imposta "is_better_for_less": true SOLO se il componente proposto è tecnicamente superiore all'originale E ha un prezzo minore o uguale a "best_found".
+- Usa URL di ricerca ufficiali validi su Amazon.it (https://www.amazon.it/s?k=...) o Idealo (https://www.idealo.it/risultati.html?q=...).
+
+Componenti attuali:
+{json.dumps(summary, ensure_ascii=False)}
+
+Restituisci SOLO un array JSON valido:
+[
+  {{
+    "for_component": "Nome componente originale",
+    "category": "Categoria",
+    "original_target": 270,
+    "name": "Nome alternativa/upgrade",
+    "store": "Amazon.it",
+    "price": 259.00,
+    "url": "https://www.amazon.it/s?k=...",
+    "reason": "Motivo tecnico sintetico",
+    "is_better_for_less": true
+  }}
+]
+"""
+    raw_text = call_openrouter(api_key, prompt)
+    if not raw_text:
+        return []
+    try:
+        match = re.search(r'\[.*\]', raw_text.strip(), re.DOTALL)
+        if match:
+            parsed = json.loads(match.group(0))
+            return [
+                alt for alt in parsed
+                if float(alt.get("price", 99999)) <= float(alt.get("original_target", 0)) + max_extra
+            ]
+    except Exception as e:
+        print(f"Errore parsing JSON OpenRouter: {e}")
+    return []
+
+def run_pipeline():
+    config = load_config()
+    api_key = os.environ.get("OPENROUTER_API_KEY")
     rome_time = datetime.now(ZoneInfo("Europe/Rome")).strftime("%d/%m/%Y alle %H:%M")
-    
+
     results = {
         "last_updated": rome_time,
         "components": [],
@@ -73,103 +196,58 @@ def fetch_prices(client, config):
     }
 
     for comp in config["components"]:
-        print(f"Analisi componente: {comp['name']}...")
-        max_alt_price = comp["target_price"] + max_extra
-        
-        raw_results = web_search_offers(comp["search_query"])
-        
-        prompt = f"""
-Sei un analista hardware esperto del mercato italiano ed europeo.
-Analizza i risultati web e le tue conoscenze aggiornate per restituire i prezzi in Euro (€) di:
-Componente: {comp['name']}
-Specifiche: {comp['specs_notes']}
-Prezzo target: {comp['target_price']} €
-Store affidabili: {stores_str}
+        print(f"Scraping prezzi per: {comp['name']}...")
+        found = []
+        found.extend(scrape_trovaprezzi(comp["search_query"]))
+        found.extend(scrape_ldlc(comp["search_query"]))
 
-Risultati web trovati:
-{json.dumps(raw_results, ensure_ascii=False)}
+        min_valid = comp["target_price"] * 0.45
+        max_valid = comp["target_price"] * 1.60
+        valid_offers = [o for o in found if min_valid <= o["price"] <= max_valid]
 
-Compiti:
-1. "offers": Restituisci esattamente 5 offerte su 5 store diversi (scegli tra Amazon.it, BPM Power, RedGaming, LDLC, PcComponentes, Ollo Store, Esseshop, Caseking, Idealo, Trovaprezzi), ordinate dal prezzo più basso al più alto. Usa gli URL reali trovati nei risultati web se presenti, altrimenti usa l'URL di ricerca ufficiale sullo store (es. https://www.bpm-power.com/it/ricerca?q=..., https://www.amazon.it/s?k=..., https://redgaming.it/ricerca?controller=search&s=..., https://www.ldlc.com/it-it/cerca/..., https://www.pccomponentes.it/search/?query=...).
-2. "alternatives": Restituisci 2 componenti alternativi o superiori nella categoria "{comp['category']}" con prezzo massimo {max_alt_price} €.
-   - Imposta "is_better_for_less": true SOLO se il pezzo alternativo è tecnicamente superiore a "{comp['name']}" E costa meno o uguale a {comp['target_price']} €.
+        by_store = {}
+        for o in valid_offers:
+            st = o["store"]
+            if st not in by_store or o["price"] < by_store[st]["price"]:
+                by_store[st] = o
 
-Rispondi ESCLUSIVAMENTE con JSON valido:
-{{
-  "offers": [
-    {{
-      "store": "BPM Power",
-      "product_title": "Titolo prodotto",
-      "price": 259.90,
-      "url": "https://..."
-    }}
-  ],
-  "alternatives": [
-    {{
-      "name": "Nome componente alternativo",
-      "store": "Amazon.it",
-      "price": 245.00,
-      "url": "https://...",
-      "reason": "Motivo breve",
-      "is_better_for_less": true
-    }}
-  ]
-}}
-"""
+        sorted_offers = sorted(by_store.values(), key=lambda x: x["price"])
 
-        try:
-            raw_text = generate_with_fallback(client, prompt)
-            parsed = extract_json_from_text(raw_text)
-            offers = sorted(parsed.get("offers", []), key=lambda x: float(x.get("price", 99999)))
-            print(f" -> OK: {len(offers)} offerte per {comp['name']}")
-            
-            results["components"].append({
-                "id": comp["id"],
-                "category": comp["category"],
-                "name": comp["name"],
-                "target_price": comp["target_price"],
-                "offers": offers
-            })
+        if len(sorted_offers) < 5:
+            existing_stores = {o["store"].lower() for o in sorted_offers}
+            for fallback in build_direct_search_links(comp):
+                if fallback["store"].lower() not in existing_stores and len(sorted_offers) < 5:
+                    sorted_offers.append(fallback)
 
-            for alt in parsed.get("alternatives", []):
-                if float(alt.get("price", 99999)) <= max_alt_price:
-                    alt["for_component"] = comp["name"]
-                    alt["category"] = comp["category"]
-                    alt["original_target"] = comp["target_price"]
-                    results["alternatives"].append(alt)
-
-        except Exception as e:
-            print(f"Errore su {comp['name']}: {e}")
-            results["components"].append({
-                "id": comp["id"],
-                "category": comp["category"],
-                "name": comp["name"],
-                "target_price": comp["target_price"],
-                "offers": []
-            })
-        
+        print(f" -> {len(sorted_offers)} offerte pronte per {comp['name']}")
+        results["components"].append({
+            "id": comp["id"],
+            "category": comp["category"],
+            "name": comp["name"],
+            "target_price": comp["target_price"],
+            "offers": sorted_offers[:5]
+        })
         time.sleep(1)
 
+    results["alternatives"] = analyze_alternatives_with_openrouter(api_key, config, results["components"])
+    print(f" -> {len(results['alternatives'])} alternative generate da OpenRouter")
     return results
 
 def send_email_report(data):
     email_user = os.environ.get("EMAIL_USER")
     email_pass = os.environ.get("EMAIL_PASS")
-    
     if not email_user or not email_pass:
         return
 
-    total_min = 0
+    total_min = sum(float(c["offers"][0]["price"]) for c in data["components"] if c["offers"])
     html_rows = ""
     for comp in data["components"]:
         if comp["offers"]:
             best = comp["offers"][0]
-            price = float(best["price"])
-            total_min += price
             html_rows += f"""
             <tr>
                 <td style="padding:8px;border:1px solid #ddd;"><b>{comp['category']}</b><br>{comp['name']}</td>
-                <td style="padding:8px;border:1px solid #ddd;color:#16a34a;font-weight:bold;">{price:.2f} €</td>
+                <td style="padding:8px;border:1px solid #ddd;color:#16a34a;font-weight:bold;">{float(best['price']):.2f} €</td>
                 <td style="padding:8px;border:1px solid #ddd;"><a href="{best['url']}">{best['store']}</a></td>
             </tr>
             """
@@ -190,7 +268,6 @@ def send_email_report(data):
     <body style="font-family:Arial,sans-serif;color:#222;">
         <h2>🖥️ Aggiornamento Prezzi Build PC ({data['last_updated']})</h2>
         <p>Totale stimato miglior combinazione attuale: <strong style="font-size:18px;color:#16a34a;">{total_min:.2f} €</strong></p>
-        <h3>Migliori prezzi per i tuoi componenti:</h3>
         <table style="border-collapse:collapse;width:100%;">
             <tr style="background:#f3f4f6;">
                 <th style="padding:8px;border:1px solid #ddd;text-align:left;">Componente</th>
@@ -224,12 +301,7 @@ def send_email_report(data):
     print("Email inviata con successo!")
 
 if __name__ == "__main__":
-    api_key = os.environ.get("GEMINI_API_KEY")
-    client = genai.Client(api_key=api_key)
-    config = load_config()
-    data = fetch_prices(client, config)
-    
+    data = run_pipeline()
     with open("prezzi.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-        
     send_email_report(data)
