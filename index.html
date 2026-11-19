@@ -3,232 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitor Prezzi Build PC</title>
+  <title>Build PC Tracker — Prezzi Live</title>
   <style>
     :root {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #2563eb;
-      --green-bg: #dcfce7;
-      --green-text: #15803d;
-      --amber-bg: #fef3c7;
-      --amber-text: #b45309;
+      --bg: #0b0f19;
+      --surface: #131a2a;
+      --surface-hover: #1b2438;
+      --border: #243049;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.14);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.14);
     }
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 20px;
+      padding: 24px 16px;
+      line-height: 1.5;
     }
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1320px; margin: 0 auto; }
     header {
-      background: var(--card);
+      background: linear-gradient(135deg, #131a2a 0%, #172036 100%);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      gap: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     }
-    h1 {
-      margin: 0 0 6px 0;
-      font-size: 1.5rem;
-    }
-    .subtitle {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin: 0;
-    }
-    .summary-box {
+    h1 { margin: 0 0 6px 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin: 0; }
+    .total-card {
       background: var(--green-bg);
-      color: var(--green-text);
-      padding: 12px 20px;
-      border-radius: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 14px 24px;
+      border-radius: 14px;
       text-align: right;
     }
-    .summary-box span {
+    .total-card span {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      color: var(--green);
     }
-    .summary-box strong {
-      font-size: 1.6rem;
-    }
+    .total-card strong { font-size: 1.85rem; color: #ffffff; }
     h2 {
       font-size: 1.2rem;
-      margin: 28px 0 12px 0;
+      margin: 32px 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .table-wrapper {
-      background: var(--card);
+    .table-box {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       overflow-x: auto;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 850px;
-    }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
     th, td {
-      padding: 14px 16px;
+      padding: 16px;
       border-bottom: 1px solid var(--border);
       text-align: left;
-      vertical-align: top;
+      vertical-align: middle;
     }
     th {
-      background: #f1f5f9;
-      font-size: 0.85rem;
+      background: #0f1523;
+      font-size: 0.78rem;
       text-transform: uppercase;
       color: var(--muted);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.05em;
     }
     tr:last-child td { border-bottom: none; }
-    .comp-cat {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-    }
-    .comp-name {
-      font-weight: 600;
-      font-size: 0.95rem;
-      margin: 3px 0;
-    }
-    .comp-target {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    .offer-card {
+    tbody tr:hover { background: rgba(255,255,255,0.015); }
+    .cat-tag {
       display: inline-block;
-      background: #f8fafc;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .comp-title { font-weight: 600; font-size: 0.98rem; color: #fff; }
+    .comp-meta { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
+    .price-pill {
+      display: flex;
+      flex-direction: column;
+      background: #0f1523;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
+      border-radius: 10px;
+      padding: 10px 14px;
       text-decoration: none;
       color: var(--text);
-      min-width: 135px;
-      transition: transform 0.1s, border-color 0.1s;
+      transition: all 0.15s ease;
     }
-    .offer-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-1px);
+    .price-pill:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+      transform: translateY(-2px);
     }
-    .offer-card.best {
+    .price-pill.best {
       background: var(--green-bg);
-      border-color: #86efac;
+      border-color: rgba(16, 185, 129, 0.45);
     }
-    .offer-price {
-      font-weight: 700;
-      font-size: 1.05rem;
-      display: block;
-    }
-    .offer-card.best .offer-price {
-      color: var(--green-text);
-    }
-    .offer-store {
-      font-size: 0.82rem;
-      color: var(--muted);
-      display: block;
-      margin-top: 2px;
-    }
-    .badge-upgrade {
+    .price-val { font-size: 1.08rem; font-weight: 700; color: #fff; }
+    .price-pill.best .price-val { color: #34d399; }
+    .store-lbl { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+    .badge-fire {
       display: inline-block;
       background: var(--green-bg);
-      color: var(--green-text);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
       font-weight: 700;
-      font-size: 0.78rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      margin-bottom: 4px;
+      font-size: 0.76rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
     }
     .badge-alt {
       display: inline-block;
       background: var(--amber-bg);
-      color: var(--amber-text);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
       font-weight: 600;
-      font-size: 0.78rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      margin-bottom: 4px;
+      font-size: 0.76rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
     }
-    .btn-link {
+    .cta-btn {
       display: inline-block;
-      background: var(--primary);
-      color: #fff;
+      background: var(--accent);
+      color: #0b0f19;
       text-decoration: none;
-      padding: 7px 14px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
+      transition: opacity 0.15s;
     }
-    .empty-msg {
-      padding: 30px;
-      text-align: center;
-      color: var(--muted);
-    }
+    .cta-btn:hover { opacity: 0.88; }
+    .empty-msg { padding: 32px; text-align: center; color: var(--muted); }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div>
-        <h1>🖥️ Monitor Prezzi Componenti PC</h1>
-        <p class="subtitle" id="last-updated">Caricamento dati in corso...</p>
+        <h1>🖥️ Build PC — Monitor Prezzi Live</h1>
+        <p class="subtitle" id="last-updated">Caricamento listini in corso...</p>
       </div>
-      <div class="summary-box">
-        <span>Miglior Totale Stimato</span>
+      <div class="total-card">
+        <span>Miglior Totale Combinato</span>
         <strong id="total-price">-- €</strong>
       </div>
     </header>
 
     <h2>1. Componenti Scelti (ordinati dal prezzo più basso al più alto)</h2>
-    <div class="table-wrapper">
+    <div class="table-box">
       <table>
         <thead>
           <tr>
             <th style="width: 26%;">Componente</th>
             <th>1° Miglior Prezzo</th>
-            <th>2° Store</th>
-            <th>3° Store</th>
-            <th>4° Store</th>
-            <th>5° Store</th>
+            <th>2° Opzione</th>
+            <th>3° Opzione</th>
+            <th>4° Opzione</th>
+            <th>5° Opzione</th>
           </tr>
         </thead>
         <tbody id="main-table-body">
-          <tr><td colspan="6" class="empty-msg">In attesa della prima scansione del bot...</td></tr>
+          <tr><td colspan="6" class="empty-msg">Caricamento dati...</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h2>2. Alternative & Upgrade Convenienti (max +150 € rispetto al target)</h2>
-    <div class="table-wrapper">
+    <h2>2. Alternative & Upgrade Convenienti (max +150 € sul target)</h2>
+    <div class="table-box">
       <table>
         <thead>
           <tr>
-            <th>Segnalazione</th>
-            <th>Componente Alternativo</th>
-            <th>Al posto di</th>
+            <th>Valutazione</th>
+            <th>Componente Proposto</th>
+            <th>Sostituisce</th>
             <th>Store</th>
             <th>Prezzo</th>
-            <th>Azione</th>
+            <th>Link</th>
           </tr>
         </thead>
         <tbody id="alt-table-body">
-          <tr><td colspan="6" class="empty-msg">Nessuna alternativa caricata al momento.</td></tr>
+          <tr><td colspan="6" class="empty-msg">Caricamento alternative...</td></tr>
         </tbody>
       </table>
     </div>
@@ -238,11 +216,11 @@
     async function loadPrices() {
       try {
         const res = await fetch('prezzi.json?t=' + new Date().getTime());
-        if (!res.ok) throw new Error('File prezzi.json non ancora creato dal bot');
+        if (!res.ok) throw new Error('File non trovato');
         const data = await res.json();
 
         document.getElementById('last-updated').textContent =
-          'Ultimo aggiornamento automatico: ' + (data.last_updated || 'N/D');
+          'Ultimo aggiornamento (ora italiana): ' + (data.last_updated || 'N/D');
 
         const mainBody = document.getElementById('main-table-body');
         mainBody.innerHTML = '';
@@ -250,33 +228,29 @@
 
         data.components.forEach(comp => {
           const tr = document.createElement('tr');
-          
           const tdComp = document.createElement('td');
           tdComp.innerHTML = `
-            <div class="comp-cat">${comp.category}</div>
-            <div class="comp-name">${comp.name}</div>
-            <div class="comp-target">Target riferimento: ${comp.target_price} €</div>
+            <span class="cat-tag">${comp.category}</span>
+            <div class="comp-title">${comp.name}</div>
+            <div class="comp-meta">Target: ${comp.target_price} €</div>
           `;
           tr.appendChild(tdComp);
 
           const offers = comp.offers || [];
-          if (offers.length > 0) {
-            totalMin += parseFloat(offers[0].price);
-          }
+          if (offers.length > 0) totalMin += parseFloat(offers[0].price);
 
           for (let i = 0; i < 5; i++) {
             const td = document.createElement('td');
             if (offers[i]) {
               const off = offers[i];
-              const isBest = i === 0 ? 'best' : '';
               td.innerHTML = `
-                <a class="offer-card ${isBest}" href="${off.url}" target="_blank" rel="noopener">
-                  <span class="offer-price">${parseFloat(off.price).toFixed(2)} €</span>
-                  <span class="offer-store">${off.store}</span>
+                <a class="price-pill ${i === 0 ? 'best' : ''}" href="${off.url}" target="_blank" rel="noopener">
+                  <span class="price-val">${parseFloat(off.price).toFixed(2)} €</span>
+                  <span class="store-lbl">${off.store}</span>
                 </a>
               `;
             } else {
-              td.innerHTML = `<span style="color:#cbd5e1;">—</span>`;
+              td.innerHTML = `<span style="color:#475569;">—</span>`;
             }
             tr.appendChild(td);
           }
@@ -290,31 +264,28 @@
         const alts = data.alternatives || [];
 
         if (alts.length === 0) {
-          altBody.innerHTML = '<tr><td colspan="6" class="empty-msg">Nessun pezzo alternativo trovato in questa scansione.</td></tr>';
+          altBody.innerHTML = '<tr><td colspan="6" class="empty-msg">Nessuna alternativa caricata in questa scansione.</td></tr>';
         } else {
-          // Metti prima i pezzi migliori a prezzo minore
           alts.sort((a, b) => (b.is_better_for_less === true) - (a.is_better_for_less === true));
-
           alts.forEach(alt => {
             const tr = document.createElement('tr');
             const badge = alt.is_better_for_less
-              ? `<span class="badge-upgrade">🔥 PEZZO MIGLIORE A PREZZO MINORE</span>`
+              ? `<span class="badge-fire">🔥 MIGLIORE A PREZZO MINORE</span>`
               : `<span class="badge-alt">💡 Alternativa / Upgrade</span>`;
 
             tr.innerHTML = `
-              <td>${badge}<br><small style="color:#475569;">${alt.reason || ''}</small></td>
-              <td><strong>${alt.name}</strong></td>
-              <td><small>${alt.for_component}<br>(Target: ${alt.original_target} €)</small></td>
+              <td>${badge}<div class="comp-meta">${alt.reason || ''}</div></td>
+              <td><div class="comp-title">${alt.name}</div></td>
+              <td><div class="comp-meta">${alt.for_component}<br>Target: ${alt.original_target} €</div></td>
               <td>${alt.store}</td>
-              <td><strong>${parseFloat(alt.price).toFixed(2)} €</strong></td>
-              <td><a class="btn-link" href="${alt.url}" target="_blank" rel="noopener">Vedi offerta</a></td>
+              <td><strong style="font-size:1.05rem;">${parseFloat(alt.price).toFixed(2)} €</strong></td>
+              <td><a class="cta-btn" href="${alt.url}" target="_blank" rel="noopener">Apri Store</a></td>
             `;
             altBody.appendChild(tr);
           });
         }
       } catch (err) {
-        document.getElementById('last-updated').textContent =
-          'In attesa della prima esecuzione del bot (esegui il workflow dal Passo 7).';
+        document.getElementById('last-updated').textContent = 'In attesa dei dati aggiornati...';
       }
     }
     loadPrices();
