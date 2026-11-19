@@ -1,0 +1,87 @@
+{
+  "max_extra_budget_eur": 150,
+  "components": [
+    {
+      "id": "gpu",
+      "category": "Scheda Video (GPU)",
+      "name": "NVIDIA GeForce RTX 5060 Ti 16GB Dual",
+      "search_query": "RTX 5060 Ti 16GB",
+      "target_price": 480,
+      "specs_notes": "GDDR7, 16GB VRAM, dual fan"
+    },
+    {
+      "id": "cpu",
+      "category": "Processore (CPU)",
+      "name": "AMD Ryzen 7 9700X",
+      "search_query": "AMD Ryzen 7 9700X",
+      "target_price": 270,
+      "specs_notes": "AM5, 8 Core / 16 Thread, 65W TDP"
+    },
+    {
+      "id": "cooler",
+      "category": "Dissipatore CPU",
+      "name": "Thermalright Phantom Spirit 120 SE",
+      "search_query": "Thermalright Phantom Spirit 120 SE",
+      "target_price": 42,
+      "specs_notes": "Doppia torre ad aria, socket AM5"
+    },
+    {
+      "id": "mobo",
+      "category": "Scheda Madre",
+      "name": "MSI MAG B850 TOMAHAWK MAX WIFI",
+      "search_query": "MSI MAG B850 TOMAHAWK MAX WIFI",
+      "target_price": 265,
+      "specs_notes": "ATX, AM5, PCIe 5.0 x16, WiFi"
+    },
+    {
+      "id": "ram",
+      "category": "Memoria RAM",
+      "name": "Corsair Vengeance 32GB (2x16GB) DDR5-6000 CL30 EXPO",
+      "search_query": "32GB DDR5 6000 CL30 EXPO",
+      "target_price": 115,
+      "specs_notes": "Low Profile, AMD EXPO, 6000MHz CL30"
+    },
+    {
+      "id": "ssd",
+      "category": "SSD Principale NVMe",
+      "name": "Crucial T705 2TB PCIe 5.0 (senza dissipatore)",
+      "search_query": "Crucial T705 2TB",
+      "target_price": 230,
+      "specs_notes": "PCIe 5.0 NVMe M.2 2280 senza heatsink"
+    },
+    {
+      "id": "psu",
+      "category": "Alimentatore (PSU)",
+      "name": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
+      "search_query": "Corsair RM850x ATX 3.1",
+      "target_price": 140,
+      "specs_notes": "850W 80+ Gold, completamente modulare, ATX 3.1"
+    },
+    {
+      "id": "case",
+      "category": "Case PC",
+      "name": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+      "search_query": "Lian Li Lancool 216",
+      "target_price": 115,
+      "specs_notes": "ATX Mid Tower High Airflow"
+    }
+  ],
+  "trusted_stores": [
+    "Amazon.it",
+    "Amazon Seconda Mano",
+    "BPM Power",
+    "RedGaming",
+    "LDLC",
+    "PcComponentes",
+    "Ollo Store",
+    "Esseshop",
+    "Caseking",
+    "Alternate",
+    "Alza",
+    "NextHS",
+    "Drako",
+    "Idealo",
+    "Trovaprezzi",
+    "AliExpress EU"
+  ]
+}
