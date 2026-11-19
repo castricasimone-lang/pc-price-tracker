@@ -29,7 +29,7 @@
       "id": "mobo",
       "category": "Scheda Madre",
       "name": "MSI MAG B850 TOMAHAWK MAX WIFI",
-      "search_query": "MSI MAG B850 TOMAHAWK MAX WIFI",
+      "search_query": "MSI B850 Tomahawk",
       "target_price": 265,
       "specs_notes": "ATX, AM5, PCIe 5.0 x16, WiFi"
     },
@@ -52,15 +52,15 @@
     {
       "id": "psu",
       "category": "Alimentatore (PSU)",
-      "name": "Corsair RM850x ATX 3.1 / MSI MPG A850G PCIE5",
-      "search_query": "Corsair RM850x ATX 3.1",
+      "name": "Corsair RM850x ATX 3.1",
+      "search_query": "Corsair RM850x 850W",
       "target_price": 140,
       "specs_notes": "850W 80+ Gold, completamente modulare, ATX 3.1"
     },
     {
       "id": "case",
       "category": "Case PC",
-      "name": "Lian Li Lancool 216 / Corsair 4000D Airflow / Fractal Design North",
+      "name": "Lian Li Lancool 216",
       "search_query": "Lian Li Lancool 216",
       "target_price": 115,
       "specs_notes": "ATX Mid Tower High Airflow"
@@ -77,7 +77,7 @@
     "Esseshop",
     "Caseking",
     "Alternate",
-    "Alza",
+    "eTec",
     "NextHS",
     "Drako",
     "Idealo",
